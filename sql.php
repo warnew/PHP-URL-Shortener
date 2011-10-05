@@ -5,7 +5,7 @@
 
 
 function sql_connect() {
-   if (DB_TYPE == 'postgreql') {
+   if (DB_TYPE == 'postgresql') {
       pg_connect("password=".DB_PASSWORD." host=".DB_HOST." dbname=".DB_NAME." user=".DB_USER);
       return;
    }
@@ -17,18 +17,49 @@ function sql_connect() {
    die("Please choose a database type!");
 }
 
+function sql_lock($table,$mode) {
+   if (DB_TYPE == 'postgresql') {
+      pg_query('begin work'); // yeah, i dont know what that lock table stuff is about :)
+      return;
+   }
+   if (DB_TYPE == 'mysql') {
+      mysql_query('LOCK TABLES '. $table .' '. $mode);
+      return;
+   }
+}
+
+function sql_unlock() {
+   if (DB_TYPE == 'postgresql') {
+      pg_query('commit work;');
+      return;
+   }
+   if (DB_TYPE == 'mysql') {
+      mysql_query('UNLOCK TABLES ');
+      return;
+   }
+}
+
 function sql_insert($query) {
    if (DB_TYPE == 'postgresql') {
       $res = pg_query($query); 
       if (pg_result_status($res) == PGSQL_COMMAND_OK) {
-         $res = sql_select('lastval() as lastval'); // lastval() is available in PostgreSQL versions >=8.1 
-         return $res[0]['lastval'];
+         $res = sql_result('select lastval();',0,0); // lastval() is available in PostgreSQL versions >=8.1 
+         return $res;
       }
       return -1;
    }
    if (DB_TYPE == 'mysql') {
       mysql_query($query);
-      return mysql_insert_id()
+      return mysql_insert_id();
+   }
+}
+
+function sql_escape_string($q) {
+   if (DB_TYPE == 'postgresql') {
+      return pg_escape_string($q);
+   }
+   if (DB_TYPE == 'mysql') {
+      return mysql_real_escape_string($q);
    }
 }
 

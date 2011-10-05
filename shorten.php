@@ -34,7 +34,7 @@ if(!empty($url_to_shorten) && preg_match('|^https?://|', $url_to_shorten))
 	}
 	
 	// check if the URL has already been shortened
-	$already_shortened = sql_result('SELECT id FROM ' . DB_TABLE. ' WHERE long_url="' . mysql_real_escape_string($url_to_shorten) . '"', 0, 0);
+	$already_shortened = sql_result("SELECT id FROM " . DB_TABLE. " WHERE long_url='" . sql_escape_string($url_to_shorten) . "'", 0, 0);
 	if(!empty($already_shortened))
 	{
 		// URL has already been shortened
@@ -43,10 +43,10 @@ if(!empty($url_to_shorten) && preg_match('|^https?://|', $url_to_shorten))
 	else
 	{
 		// URL not in database, insert
-		sql_query('LOCK TABLES ' . DB_TABLE . ' WRITE;');
-      $id = sql_insert('INSERT INTO ' . DB_TABLE . ' (long_url, created, creator) VALUES ("' . mysql_real_escape_string($url_to_shorten) . '", "' . time() . '", "' . mysql_real_escape_string($_SERVER['REMOTE_ADDR']) . '")');
+		sql_lock(DB_TABLE,' WRITE');
+      $id = sql_insert("INSERT INTO " . DB_TABLE . " (long_url, created, creator) VALUES ('" . sql_escape_string($url_to_shorten) . "', '" . time() . "', '" . sql_escape_string($_SERVER["REMOTE_ADDR"]) . "')");
 		$shortened_url = getShortenedURLFromID($id);
-		sql_query('UNLOCK TABLES');
+		sql_unlock();
 	}
 	echo BASE_HREF . $shortened_url;
 }
