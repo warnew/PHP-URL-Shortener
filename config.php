@@ -5,16 +5,23 @@
  * Contact the author at http://briancray.com/
  */
 
+
+// where is an sql query there is a config php, so we can include from here
+require('sql.php');
+
 // db options
 define('DB_NAME', 'your db name');
-define('DB_USER', 'your db usernae');
+define('DB_USER', 'your db username');
 define('DB_PASSWORD', 'your db password');
 define('DB_HOST', 'localhost');
+//if you change DB_TABLE you should also change it in the relevant sql file
 define('DB_TABLE', 'shortenedurls');
+// either mysql or postgresql
+define('DB_TYPE', 'postgresql');
 
 // connect to database
-mysql_connect(DB_HOST, DB_USER, DB_PASSWORD);
-mysql_select_db(DB_NAME);
+sql_connect(DB_HOST, DB_USER, DB_PASSWORD);
+sql_select_db(DB_NAME);
 
 // base location of script (include trailing slash)
 define('BASE_HREF', 'http://' . $_SERVER['HTTP_HOST'] . '/');
